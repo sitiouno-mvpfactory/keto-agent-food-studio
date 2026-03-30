@@ -1,0 +1,30 @@
+# Keto Agent Food
+
+**Tagline:** Transform PDFs, images, and EPUBs into clean, normalized Markdown for AI ingestion.
+**Domain:** https://keto-agent-food.x53.ai
+
+## Description
+Keto Agent Food is a powerful developer tool designed to seamlessly convert various document formats (PDFs, images, and EPUBs) into normalized Markdown. Built specifically for developers and AI agents, it features a robust REST API, MCP (Model Context Protocol) Server integration, secure Stripe billing, and real-time webhooks to perfectly streamline data ingestion pipelines.
+
+## Key Features
+- **Universal Ingestion:** Extract structured text and formatting from PDFs, raw images, and EPUB files into pristine Markdown.
+- **REST API & Webhooks:** Asynchronous REST architecture. Submit documents and receive real-time webhook payloads upon completion.
+- **Native MCP Server:** Gives AI agents direct access to document processing capabilities.
+- **Stripe Billing:** Secure, transparent, usage-based pricing. Only pay for the megabytes you process.
+
+## Target Audience
+Developers, AI engineers, and autonomous agents requiring clean, normalized Markdown data streams.
+
+## Important Links
+- **Website:** https://keto-agent-food.x53.ai
+- **GitHub Repository:** https://github.com/sitiouno/keto-agent-food-studio
+
+## API Usage Example
+```bash
+# Submit a document for processing
+curl -X POST https://api.keto-agent-food.x53.ai/v1/convert \
+  -H "Authorization: Bearer <API_KEY>" \
+  -H "Content-Type: multipart/form-data" \
+  -F "file=@report.pdf" \
+  -F "webhook_url=https://your-app.com/webhook"
+```
