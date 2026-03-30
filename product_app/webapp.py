@@ -656,10 +656,14 @@ app.mount("/static", StaticFiles(directory=STATIC_DIR), name="static")
 def custom_openapi():
     if app.openapi_schema:
         return app.openapi_schema
+    product_name = settings.website_name or "Product"
     openapi_schema = get_openapi(
-        title="Product Name API",
+        title=f"{product_name} API",
         version="1.0.0",
-        description="Private API for Sitio Uno Inc. - API keys are required.",
+        description=(
+            f"{product_name} REST API. Authenticate with your API key "
+            f"via the X-API-Key header. Visit the app to generate keys."
+        ),
         routes=app.routes,
     )
     if "components" not in openapi_schema:
