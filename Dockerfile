@@ -6,20 +6,15 @@ ENV PIP_NO_CACHE_DIR=1
 
 WORKDIR /app
 
-RUN apt-get update \
-    && apt-get install -y --no-install-recommends \
-       fonts-dejavu-core \
-    && rm -rf /var/lib/apt/lists/* \
-    && useradd -m appuser
+RUN apt-get update     && apt-get install -y --no-install-recommends        fonts-dejavu-core     && rm -rf /var/lib/apt/lists/*     && useradd -m appuser
 
 COPY pyproject.toml README.md ./
 COPY product_app ./product_app
 COPY docs ./docs
 COPY tests ./tests
+COPY index.html ./index.html
 
-RUN python -m pip install --upgrade pip \
-    && python -m pip install . \
-    && chown -R appuser:appuser /app
+RUN python -m pip install --upgrade pip     && python -m pip install .     && chown -R appuser:appuser /app
 
 USER appuser
 
