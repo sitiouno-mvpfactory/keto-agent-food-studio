@@ -13,6 +13,8 @@ COPY product_app ./product_app
 COPY docs ./docs
 COPY tests ./tests
 COPY index.html ./index.html
+COPY terms.html ./terms.html
+COPY privacy.html ./privacy.html
 
 RUN python -m pip install --upgrade pip     && python -m pip install .     && chown -R appuser:appuser /app
 
