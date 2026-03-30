@@ -1,0 +1,597 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Keto Agent Food - Transform PDFs, images, and EPUBs into clean, normalized Markdown for AI ingestion. Developer-first API.">
+    <meta name="theme-color" content="#059669">
+    <title>Keto Agent Food | Normalized Markdown for AI Agents</title>
+    
+    <style>
+        /* CSS Variables */
+        :root {
+            /* Product Color Palette */
+            --primary: #059669; /* Emerald Green */
+            --primary-hover: #047857;
+            --primary-light: rgba(5, 150, 105, 0.1);
+            --secondary: #064E3B; /* Dark Emerald */
+            --accent: #F59E0B; /* Amber */
+            
+            /* Theme Colors (Dark Developer Theme) */
+            --bg: #0B1120;
+            --bg-elevated: #1E293B;
+            --bg-header: rgba(11, 17, 32, 0.85);
+            --text-main: #F8FAFC;
+            --text-muted: #94A3B8;
+            --border: #334155;
+            
+            /* Typography */
+            --font-sans: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+            
+            /* Spacing & Layout */
+            --max-width: 1200px;
+            --radius-md: 0.5rem;
+            --radius-lg: 1rem;
+            --radius-xl: 1.5rem;
+            --transition: all 0.3s ease;
+        }
+
+        /* Reset & Base Styles */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: var(--font-sans);
+            background-color: var(--bg);
+            color: var(--text-main);
+            line-height: 1.6;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        a {
+            text-decoration: none;
+            color: var(--primary);
+            transition: var(--transition);
+        }
+        
+        a:hover {
+            color: var(--accent);
+        }
+
+        ul {
+            list-style: none;
+        }
+
+        /* Typography */
+        h1, h2, h3, h4 {
+            line-height: 1.2;
+            font-weight: 700;
+            color: var(--text-main);
+            margin-bottom: 1rem;
+        }
+
+        h1 { font-size: clamp(2.5rem, 5vw, 4rem); letter-spacing: -0.02em; }
+        h2 { font-size: clamp(2rem, 4vw, 3rem); }
+        h3 { font-size: 1.5rem; }
+        
+        p {
+            color: var(--text-muted);
+            margin-bottom: 1.5rem;
+            font-size: 1.125rem;
+        }
+
+        /* Layout Utility */
+        .container {
+            width: 100%;
+            max-width: var(--max-width);
+            margin: 0 auto;
+            padding: 0 1.5rem;
+        }
+
+        /* Components */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0.75rem 1.5rem;
+            font-weight: 600;
+            border-radius: var(--radius-md);
+            transition: var(--transition);
+            cursor: pointer;
+            border: none;
+            font-size: 1rem;
+        }
+
+        .btn-primary {
+            background-color: var(--primary);
+            color: #fff;
+            box-shadow: 0 4px 14px 0 rgba(5, 150, 105, 0.39);
+        }
+
+        .btn-primary:hover {
+            background-color: var(--primary-hover);
+            transform: translateY(-2px);
+            color: #fff;
+        }
+
+        .btn-secondary {
+            background-color: var(--bg-elevated);
+            color: var(--text-main);
+            border: 1px solid var(--border);
+        }
+
+        .btn-secondary:hover {
+            border-color: var(--primary);
+            color: var(--primary);
+        }
+
+        /* Header */
+        header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 100;
+            background: var(--bg-header);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--border);
+        }
+
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            height: 4.5rem;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: var(--text-main);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .logo-icon {
+            width: 2rem;
+            height: 2rem;
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+            border-radius: 0.5rem;
+            display: grid;
+            place-items: center;
+            color: white;
+            font-weight: bold;
+            font-size: 1.2rem;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+        }
+
+        .nav-links a {
+            color: var(--text-muted);
+            font-weight: 500;
+        }
+
+        .nav-links a:hover {
+            color: var(--primary);
+        }
+
+        @media (max-width: 768px) {
+            .nav-links { display: none; }
+        }
+
+        /* Hero Section */
+        .hero {
+            padding: 10rem 0 6rem;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+        }
+
+        /* Glow effect */
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: -10%;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 800px;
+            height: 800px;
+            background: radial-gradient(circle, rgba(5,150,105,0.15) 0%, rgba(11,17,32,0) 70%);
+            z-index: -1;
+            pointer-events: none;
+        }
+
+        .hero h1 span {
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .hero-desc {
+            max-width: 700px;
+            margin: 0 auto 2.5rem;
+            font-size: 1.25rem;
+        }
+
+        .hero-cta {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            margin-bottom: 4rem;
+        }
+
+        /* Terminal Mockup */
+        .terminal {
+            width: 100%;
+            max-width: 800px;
+            background: #0f172a;
+            border-radius: var(--radius-lg);
+            border: 1px solid var(--border);
+            overflow: hidden;
+            text-align: left;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            animation: fadeInUp 1s ease forwards;
+        }
+
+        .terminal-header {
+            background: #1e293b;
+            padding: 0.75rem 1rem;
+            display: flex;
+            gap: 0.5rem;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .terminal-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+        }
+        .dot-red { background-color: #EF4444; }
+        .dot-yellow { background-color: #F59E0B; }
+        .dot-green { background-color: #10B981; }
+
+        .terminal-body {
+            padding: 1.5rem;
+            font-family: var(--font-mono);
+            font-size: 0.9rem;
+            color: #e2e8f0;
+            overflow-x: auto;
+        }
+        
+        .code-comment { color: #64748b; }
+        .code-cmd { color: #38bdf8; }
+        .code-arg { color: #a3e635; }
+        .code-string { color: #fca5a5; }
+
+        /* Features Section */
+        .features {
+            padding: 6rem 0;
+            background: var(--bg);
+        }
+
+        .section-header {
+            text-align: center;
+            margin-bottom: 4rem;
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 2rem;
+        }
+
+        .feature-card {
+            background: var(--bg-elevated);
+            padding: 2rem;
+            border-radius: var(--radius-lg);
+            border: 1px solid var(--border);
+            transition: var(--transition);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-5px);
+            border-color: var(--primary);
+            box-shadow: 0 10px 30px -10px rgba(5, 150, 105, 0.2);
+        }
+
+        .feature-icon {
+            width: 3rem;
+            height: 3rem;
+            background: var(--primary-light);
+            color: var(--primary);
+            border-radius: var(--radius-md);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 1.5rem;
+        }
+        
+        .feature-icon svg {
+            width: 1.5rem;
+            height: 1.5rem;
+            fill: currentColor;
+        }
+
+        /* Pricing / CTA Section */
+        .pricing-cta {
+            padding: 6rem 0;
+            background: linear-gradient(180deg, var(--bg) 0%, var(--secondary) 150%);
+            border-top: 1px solid var(--border);
+        }
+
+        .cta-container {
+            background: var(--bg-elevated);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-xl);
+            padding: 4rem 2rem;
+            text-align: center;
+            max-width: 800px;
+            margin: 0 auto;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .cta-container::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: linear-gradient(90deg, var(--primary), var(--accent));
+        }
+
+        /* Footer */
+        footer {
+            background: var(--bg-elevated);
+            padding: 4rem 0 2rem;
+            border-top: 1px solid var(--border);
+        }
+
+        .footer-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr;
+            gap: 4rem;
+            margin-bottom: 3rem;
+        }
+
+        @media (max-width: 768px) {
+            .footer-grid { grid-template-columns: 1fr; gap: 2rem; }
+            .hero-cta { flex-direction: column; }
+        }
+
+        .footer-col h4 {
+            font-size: 1.125rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .footer-links li {
+            margin-bottom: 0.75rem;
+        }
+
+        .footer-bottom {
+            border-top: 1px solid var(--border);
+            padding-top: 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            color: var(--text-muted);
+            font-size: 0.875rem;
+        }
+
+        /* Animations */
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .animate-up {
+            animation: fadeInUp 0.8s ease forwards;
+            opacity: 0;
+        }
+        
+        .delay-1 { animation-delay: 0.1s; }
+        .delay-2 { animation-delay: 0.2s; }
+        .delay-3 { animation-delay: 0.3s; }
+    </style>
+</head>
+<body>
+
+    <!-- Header -->
+    <header>
+        <div class="container header-content">
+            <a href="#" class="logo">
+                <div class="logo-icon">K</div>
+                Keto Agent Food
+            </a>
+            <nav>
+                <ul class="nav-links">
+                    <li><a href="#features">Features</a></li>
+                    <li><a href="#api">API & Webhooks</a></li>
+                    <li><a href="#pricing">Pricing</a></li>
+                    <li><a href="https://github.com/sitiouno/keto-agent-food-studio" target="_blank">GitHub</a></li>
+                </ul>
+            </nav>
+            <a href="#cta" class="btn btn-primary" style="display: none;">Get Started</a>
+            <!-- Keep CTA simple in mobile -->
+            <a href="#cta" class="btn btn-primary">Start Ingesting</a>
+        </div>
+    </header>
+
+    <main>
+        <!-- Hero Section -->
+        <section class="hero container">
+            <h1 class="animate-up">Feed Your AI the <span>Cleanest Data</span></h1>
+            <p class="hero-desc animate-up delay-1">
+                Transform PDFs, images, and EPUBs into clean, normalized Markdown for AI ingestion. Built for developers and AI agents with robust REST APIs and native MCP integration.
+            </p>
+            <div class="hero-cta animate-up delay-2">
+                <a href="#cta" class="btn btn-primary">Get API Keys</a>
+                <a href="#features" class="btn btn-secondary">Read Documentation</a>
+            </div>
+
+            <!-- Terminal Mockup -->
+            <div class="terminal animate-up delay-3">
+                <div class="terminal-header">
+                    <div class="terminal-dot dot-red"></div>
+                    <div class="terminal-dot dot-yellow"></div>
+                    <div class="terminal-dot dot-green"></div>
+                </div>
+                <div class="terminal-body">
+<span class="code-comment"># Submit a document for processing</span><br>
+<span class="code-cmd">curl</span> <span class="code-arg">-X POST</span> <span class="code-string">https://api.keto-agent-food.x53.ai/v1/convert</span> \<br>
+  <span class="code-arg">-H</span> <span class="code-string">"Authorization: Bearer kf_live_..."</span> \<br>
+  <span class="code-arg">-H</span> <span class="code-string">"Content-Type: multipart/form-data"</span> \<br>
+  <span class="code-arg">-F</span> <span class="code-string">"file=@report2026.pdf"</span> \<br>
+  <span class="code-arg">-F</span> <span class="code-string">"webhook_url=https://your-app.com/webhook"</span><br><br>
+<span class="code-comment"># Response: 202 Accepted</span><br>
+{<br>
+  &nbsp;&nbsp;<span class="code-string">"id"</span>: <span class="code-string">"job_8x3k9m2"</span>,<br>
+  &nbsp;&nbsp;<span class="code-string">"status"</span>: <span class="code-string">"processing"</span>,<br>
+  &nbsp;&nbsp;<span class="code-string">"format_detected"</span>: <span class="code-string">"pdf"</span><br>
+}
+                </div>
+            </div>
+        </section>
+
+        <!-- Features Section -->
+        <section id="features" class="features container">
+            <div class="section-header">
+                <h2>Built for Complex AI Workflows</h2>
+                <p>Keto Agent Food seamlessly handles the heavy lifting of document normalization.</p>
+            </div>
+            
+            <div class="features-grid">
+                <!-- Feature 1 -->
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <svg xmlns="http://www.w3.org/-2000/svg" viewBox="0 0 24 24"><path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z"/></svg>
+                    </div>
+                    <h3>Universal Ingestion</h3>
+                    <p>Extract structured text and formatting accurately from complex PDFs, raw images, and EPUB files, normalizing everything into pristine Markdown.</p>
+                </div>
+
+                <!-- Feature 2 -->
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <svg xmlns="http://www.w3.org/-2000/svg" viewBox="0 0 24 24"><path d="M19 8l-4 4h3c0 3.31-2.69 6-6 6-1.01 0-1.97-.25-2.8-.7l-1.46 1.46C8.97 19.54 10.43 20 12 20c4.42 0 8-3.58 8-8h3l-4-4zM6 12c0-3.31 2.69-6 6-6 1.01 0 1.97.25 2.8.7l1.46-1.46C15.03 4.46 13.57 4 12 4c-4.42 0-8 3.58-8 8H1l4 4 4-4H6z"/></svg>
+                    </div>
+                    <h3>REST API & Webhooks</h3>
+                    <p>Integrate easily with an async REST architecture. Fire and forget your documents, and receive real-time webhook payloads when processing is complete.</p>
+                </div>
+
+                <!-- Feature 3 -->
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <svg xmlns="http://www.w3.org/-2000/svg" viewBox="0 0 24 24"><path d="M19 15v4H5v-4h14m1-2H4c-.55 0-1 .45-1 1v6c0 .55.45 1 1 1h16c.55 0 1-.45 1-1v-6c0-.55-.45-1-1-1zM7 18.5c-.82 0-1.5-.68-1.5-1.5s.68-1.5 1.5-1.5 1.5.68 1.5 1.5-.68 1.5-1.5 1.5zM19 5v4H5V5h14m1-2H4c-.55 0-1 .45-1 1v6c0 .55.45 1 1 1h16c.55 0 1-.45 1-1V4c0-.55-.45-1-1-1zM7 8.5c-.82 0-1.5-.68-1.5-1.5S6.18 5.5 7 5.5s1.5.68 1.5 1.5S7.82 8.5 7 8.5z"/></svg>
+                    </div>
+                    <h3>Native MCP Server</h3>
+                    <p>Give your AI agents direct access to document processing capabilities using our Model Context Protocol (MCP) server implementation.</p>
+                </div>
+
+                <!-- Feature 4 -->
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <svg xmlns="http://www.w3.org/-2000/svg" viewBox="0 0 24 24"><path d="M20 4H4c-1.11 0-1.99.89-1.99 2L2 18c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V6c0-1.11-.89-2-2-2zm0 14H4v-6h16v6zm0-10H4V6h16v2z"/></svg>
+                    </div>
+                    <h3>Stripe Billing Integration</h3>
+                    <p>Secure, transparent, usage-based pricing powered by Stripe. Only pay for the megabytes you process, with predictable cost scaling.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Pricing / CTA Section -->
+        <section id="cta" class="pricing-cta">
+            <div class="container">
+                <div class="cta-container">
+                    <h2>Ready to supercharge your AI data pipeline?</h2>
+                    <p style="margin: 1.5rem auto 2.5rem; max-width: 600px;">
+                        Start converting PDFs and images into normalized Markdown in minutes. Sign up to get your API key and join the developers building better AI agents.
+                    </p>
+                    <div style="display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap;">
+                        <a href="#" class="btn btn-primary">Create Developer Account</a>
+                        <a href="https://github.com/sitiouno/keto-agent-food-studio" target="_blank" class="btn btn-secondary">View GitHub Repo</a>
+                    </div>
+                    <p style="margin-top: 1.5rem; font-size: 0.875rem; color: var(--text-muted);">
+                        Secure billing provided by Stripe. Free tier available for testing.
+                    </p>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer>
+        <div class="container">
+            <div class="footer-grid">
+                <div class="footer-col">
+                    <div class="logo" style="margin-bottom: 1rem;">
+                        <div class="logo-icon">K</div>
+                        Keto Agent Food
+                    </div>
+                    <p style="font-size: 0.875rem; max-width: 300px;">
+                        The standard for converting documents to normalized Markdown for Large Language Models and AI agents.
+                    </p>
+                </div>
+                <div class="footer-col">
+                    <h4>Resources</h4>
+                    <ul class="footer-links">
+                        <li><a href="#">API Reference</a></li>
+                        <li><a href="#">Webhooks Guide</a></li>
+                        <li><a href="#">MCP Server Specs</a></li>
+                        <li><a href="#">Pricing</a></li>
+                    </ul>
+                </div>
+                <div class="footer-col">
+                    <h4>Company</h4>
+                    <ul class="footer-links">
+                        <li><a href="https://github.com/sitiouno" target="_blank">GitHub (@sitiouno)</a></li>
+                        <li><a href="#">Support</a></li>
+                        <li><a href="#">Terms of Service</a></li>
+                        <li><a href="#">Privacy Policy</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2026 Keto Agent Food. All rights reserved.</p>
+                <p>Domain: keto-agent-food.x53.ai</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Simple Intersection Observer for Animations -->
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.style.animationPlayState = 'running';
+                        observer.unobserve(entry.target);
+                    }
+                });
+            }, { threshold: 0.1 });
+
+            // Initially pause animations for elements below fold
+            document.querySelectorAll('.feature-card').forEach((el, index) => {
+                el.style.opacity = "0";
+                el.style.animation = `fadeInUp 0.6s ease forwards ${index * 0.1}s`;
+                el.style.animationPlayState = 'paused';
+                observer.observe(el);
+            });
+        });
+    </script>
+</body>
+</html>
