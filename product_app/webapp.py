@@ -2064,6 +2064,12 @@ def _marketing_user_summary(
 @app.get("/", response_class=HTMLResponse)
 async def index(request: Request) -> HTMLResponse:
     language = _resolve_language(request)
+    # Serve custom landing page if it exists
+    _custom_landing = Path(__file__).resolve().parent.parent / "index.html"
+    if _custom_landing.is_file():
+        response = HTMLResponse(_custom_landing.read_text(encoding="utf-8"))
+        _set_language_cookie(response, language)
+        return response
     html = render_landing(
         language.value,
         "/",
