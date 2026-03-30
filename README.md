@@ -1,41 +1,67 @@
-# [Product Name]
+# Keto Agent Food
 
-> An AaaS product built with the MVP Factory template.
+Transform PDFs, images, and EPUBs into clean, normalized Markdown for AI ingestion. Built for developers and AI agents, it features a robust REST API, MCP Server integration, secure Stripe billing, and real-time webhooks.
 
-## Quick Start
+## Architecture Overview
 
-1. Clone this repo
-2. `cp .env.example .env` and configure
-3. `pip install -e .`
-4. `PRODUCT_ENABLE_DEV_AUTH=true python -m product_app.webapp`
-5. Open http://127.0.0.1:8000
+```text
+[Client / AI Agent] ---> (HTTPS / REST) ---> [Cloud Run: Keto Agent Food]
+                                                    |
+                                     +--------------+--------------+
+                                     |                             |
+                              [Cloud SQL DB]               [Stripe Billing]
+                               (quien-prod)              (Usage-based/Metered)
+```
 
-## How to Add Your Own Agents
+## Environment Variables Reference
 
-1. Create a file in `product_app/research/my_agent.py`
-2. Subclass `ResearchStyleBase` from `product_app/research/base.py`
-3. Implement `build_pipeline()`, `get_stages()`, `get_section_titles()`
-4. Add `STYLE = MyStyle()` at the bottom
-5. The registry auto-discovers it!
+To run this service locally or in production, configure the following environment variables:
 
-See `product_app/research/hello_world.py` for a complete example.
+* `DOMAIN`: `keto-agent-food.x53.ai`
+* `PROJECT_NAME`: `Keto Agent Food`
+* `DB_USER`: `keto_agent_food_user`
+* `DB_PASS`: *(Retrieve from GCP Secret Manager `keto_agent_food-db-password`)*
+* `DB_NAME`: `keto_agent_food`
+* `DB_CONNECTION`: `test-agents-ai-app:us-central1:quien-prod`
+* `STRIPE_API_KEY`: Your Stripe secret key
+* `STRIPE_WEBHOOK_SECRET`: Webhook signing secret from Stripe
 
-## Architecture
+## Deployment Instructions
 
-- **FastAPI** web application with bilingual UI (EN/ES)
-- **Google ADK** agent pipeline with auto-discovery
-- **Cloud Run** deployment with GitHub Actions CI/CD
-- **Cloud SQL** PostgreSQL database
-- **Stripe** credit-based billing
-- **Magic Link** authentication (email OTP)
-- **SSE** real-time progress streaming
-- **MCP** server for AI-to-AI integration
+This project is configured to be deployed to Google Cloud Run. 
 
-## Documentation
+* **Service Name:** `keto-agent-food-studio`
+* **Live URL:** https://keto-agent-food-studio-test-agents-ai-app.us-central1.run.app
 
-- [Architecture](docs/ARCHITECTURE.md)
-- [Customization Guide](docs/CUSTOMIZATION.md)
-- [Infrastructure Setup](docs/INFRASTRUCTURE.md)
-- [Maintenance](docs/MAINTENANCE.md)
+Manual deployments can be triggered using the `gcloud` CLI:
+```bash
+gcloud run deploy keto-agent-food-studio --source . --region us-central1
+```
 
-Built by [MVP Factory Studio](https://mvpfactory.studio)
+## DNS Configuration Steps
+
+To map the custom domain, you must update your DNS provider with the following records:
+
+* **Type:** `CNAME`
+* **Name/Host:** `keto-agent-food.x53.ai`
+* **Target/Value:** `ghs.googlehosted.com`
+
+*(Note: If configuring at the apex level, use an A record pointing to Google's load balancer IPs as directed in the Google Cloud Console).*
+
+## Stripe Webhook Setup
+
+Since this product relies on usage-based (metered) pricing per Megabyte processed, Stripe must be fully configured:
+
+1. Go to your **Stripe Dashboard** -> **Developers** -> **Webhooks**.
+2. Add a new endpoint: `https://keto-agent-food.x53.ai/webhooks/stripe`
+3. Listen for the following events:
+   - `checkout.session.completed`
+   - `invoice.paid`
+4. Copy the resulting **Webhook Secret** and update `src/config/stripe_config.py` (or set the `STRIPE_WEBHOOK_SECRET` environment variable).
+5. Ensure you have created a Product named "Keto Agent Food" in Stripe with a recurring, metered pricing model.
+
+## Monitoring and Troubleshooting
+
+* **Logs:** Application logs are available in the Google Cloud Console under **Cloud Run** -> `keto-agent-food-studio` -> **Logs**.
+* **Database Access:** Use the Cloud SQL Auth Proxy to securely connect to your database instance locally using the connection name `test-agents-ai-app:us-central1:quien-prod`.
+* **Billing:** Monitor Stripe webhook deliveries in the Stripe developer dashboard to ensure successful usage reporting.
