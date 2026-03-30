@@ -2081,11 +2081,33 @@ async def index(request: Request) -> HTMLResponse:
     return response
 
 
+@app.get("/terms", response_class=HTMLResponse)
+async def terms_page() -> HTMLResponse:
+    _terms = Path(__file__).resolve().parent.parent / "terms.html"
+    if _terms.is_file():
+        return HTMLResponse(_terms.read_text(encoding="utf-8"))
+    raise HTTPException(status_code=404, detail="Page not found.")
+
+
+@app.get("/privacy", response_class=HTMLResponse)
+async def privacy_page() -> HTMLResponse:
+    _privacy = Path(__file__).resolve().parent.parent / "privacy.html"
+    if _privacy.is_file():
+        return HTMLResponse(_privacy.read_text(encoding="utf-8"))
+    raise HTTPException(status_code=404, detail="Page not found.")
+
+
 @app.get("/{language}", response_class=HTMLResponse)
 async def localized_landing(language: str, request: Request) -> HTMLResponse:
     if language not in {"en", "es"}:
         raise HTTPException(status_code=404, detail="Page not found.")
     lang = _language_from_value(language)
+    # Serve custom landing page if it exists (supports ?login=1 auth modal)
+    _custom_landing = Path(__file__).resolve().parent.parent / "index.html"
+    if _custom_landing.is_file():
+        response = HTMLResponse(_custom_landing.read_text(encoding="utf-8"))
+        _set_language_cookie(response, lang)
+        return response
     html = render_landing(
         lang.value,
         f"/{language}",
